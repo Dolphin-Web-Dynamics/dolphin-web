@@ -9,3 +9,6 @@ deploy/.vm-public-ip
 .vscode/
 .idea/
 *.swp
+
+# Sensitive — contains real credentials
+deploy/config.production.json
