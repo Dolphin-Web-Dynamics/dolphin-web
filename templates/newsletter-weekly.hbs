@@ -1,0 +1,409 @@
+{{!--
+  newsletter-weekly.hbs
+  Dolphin Web Dynamics — Weekly AI Newsletter
+  Mobile-responsive, inline CSS (email-client compatible)
+--}}
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>{{title}}</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+  <style>
+    /* Reset */
+    * { box-sizing: border-box; }
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    /* Mobile */
+    @media only screen and (max-width: 620px) {
+      .email-wrapper  { width: 100% !important; padding: 0 !important; }
+      .email-content  { width: 100% !important; padding: 24px 16px !important; }
+      .header-logo    { font-size: 20px !important; }
+      .section-card   { padding: 20px 16px !important; }
+      .item-number    { font-size: 28px !important; }
+      .cta-button     { padding: 14px 24px !important; font-size: 15px !important; }
+      .two-col        { display: block !important; width: 100% !important; }
+    }
+  </style>
+</head>
+
+<body style="margin:0; padding:0; background-color:#f0f4f8; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;">
+
+  <!-- Preview text (hidden) -->
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+    {{excerpt}} &nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;
+  </div>
+
+  <!-- Email wrapper -->
+  <table class="email-wrapper" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+    style="background-color:#f0f4f8; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+
+        <!-- Email card -->
+        <table class="email-content" role="presentation" cellspacing="0" cellpadding="0" border="0" width="600"
+          style="background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+          <!-- ================================================================
+               HEADER
+          ================================================================ -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #0a2540 0%, #1a4a7a 100%); padding: 36px 40px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td>
+                    <!-- Logo mark -->
+                    <div style="display:inline-block; width:40px; height:40px; background-color:#f97316; border-radius:50%; text-align:center; line-height:40px; font-size:20px; margin-bottom:12px;">🐬</div>
+                    <br>
+                    <!-- Brand name -->
+                    <span class="header-logo" style="font-size:22px; font-weight:700; color:#ffffff; letter-spacing:-0.5px;">
+                      Dolphin Web Dynamics
+                    </span>
+                    <br>
+                    <span style="font-size:13px; color:#93c5fd; letter-spacing:2px; text-transform:uppercase; margin-top:4px; display:block;">
+                      AI Insights Weekly
+                    </span>
+                  </td>
+                  <td align="right" valign="middle">
+                    <span style="font-size:12px; color:#64748b; background:#f8fafc; padding:6px 12px; border-radius:20px; white-space:nowrap;">
+                      {{date published_at format="MMM DD, YYYY"}}
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Issue badge -->
+          <tr>
+            <td style="background-color:#f97316; padding:8px 40px; text-align:center;">
+              <span style="font-size:12px; color:#ffffff; font-weight:600; letter-spacing:1px; text-transform:uppercase;">
+                Issue #{{@site.title}} · For Practitioners, Not Hype
+              </span>
+            </td>
+          </tr>
+
+          <!-- Body padding -->
+          <tr>
+            <td style="padding: 40px 40px 0;">
+
+              <!-- ================================================================
+                   INTRO
+              ================================================================ -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="padding-bottom:32px;">
+                    <h1 style="margin:0 0 16px; font-size:28px; font-weight:800; color:#0f172a; line-height:1.2; letter-spacing:-0.5px;">
+                      {{title}}
+                    </h1>
+                    <div style="font-size:16px; line-height:1.7; color:#374151;">
+                      {{content}}
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Divider -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="padding-bottom:32px;">
+                    <div style="height:3px; background:linear-gradient(90deg,#0a2540,#f97316,#0a2540); border-radius:2px;"></div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- ================================================================
+                   SECTION: THIS WEEK IN AI (3 items)
+              ================================================================ -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="padding-bottom:8px;">
+                    <span style="font-size:11px; font-weight:700; color:#f97316; letter-spacing:2px; text-transform:uppercase;">
+                      📡 This Week In AI
+                    </span>
+                    <h2 style="margin:8px 0 24px; font-size:20px; font-weight:700; color:#0f172a;">
+                      3 Things Worth Your Attention
+                    </h2>
+                  </td>
+                </tr>
+
+                <!-- Item 1 -->
+                <tr>
+                  <td class="section-card" style="background-color:#f8fafc; border-left:4px solid #0a2540; border-radius:0 8px 8px 0; padding:20px 24px; margin-bottom:16px; display:block;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td width="48" valign="top">
+                          <span class="item-number" style="font-size:36px; font-weight:900; color:#e2e8f0; line-height:1;">01</span>
+                        </td>
+                        <td style="padding-left:16px;">
+                          <h3 style="margin:0 0 8px; font-size:16px; font-weight:700; color:#0f172a;">
+                            {{#if @custom.item1_title}}{{@custom.item1_title}}{{else}}AI Item Title{{/if}}
+                          </h3>
+                          <p style="margin:0 0 12px; font-size:14px; line-height:1.6; color:#4b5563;">
+                            {{#if @custom.item1_summary}}{{@custom.item1_summary}}{{else}}Summary of the first notable AI development this week. What happened, why it matters to practitioners.{{/if}}
+                          </p>
+                          {{#if @custom.item1_url}}
+                          <a href="{{@custom.item1_url}}" style="font-size:13px; color:#f97316; font-weight:600; text-decoration:none;">
+                            Read more →
+                          </a>
+                          {{/if}}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <tr><td style="height:12px;"></td></tr>
+
+                <!-- Item 2 -->
+                <tr>
+                  <td class="section-card" style="background-color:#f8fafc; border-left:4px solid #1a4a7a; border-radius:0 8px 8px 0; padding:20px 24px; display:block;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td width="48" valign="top">
+                          <span class="item-number" style="font-size:36px; font-weight:900; color:#e2e8f0; line-height:1;">02</span>
+                        </td>
+                        <td style="padding-left:16px;">
+                          <h3 style="margin:0 0 8px; font-size:16px; font-weight:700; color:#0f172a;">
+                            {{#if @custom.item2_title}}{{@custom.item2_title}}{{else}}AI Item Title{{/if}}
+                          </h3>
+                          <p style="margin:0 0 12px; font-size:14px; line-height:1.6; color:#4b5563;">
+                            {{#if @custom.item2_summary}}{{@custom.item2_summary}}{{else}}Summary of the second AI development. Keep it practical and actionable.{{/if}}
+                          </p>
+                          {{#if @custom.item2_url}}
+                          <a href="{{@custom.item2_url}}" style="font-size:13px; color:#f97316; font-weight:600; text-decoration:none;">
+                            Read more →
+                          </a>
+                          {{/if}}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <tr><td style="height:12px;"></td></tr>
+
+                <!-- Item 3 -->
+                <tr>
+                  <td class="section-card" style="background-color:#f8fafc; border-left:4px solid #f97316; border-radius:0 8px 8px 0; padding:20px 24px; display:block;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td width="48" valign="top">
+                          <span class="item-number" style="font-size:36px; font-weight:900; color:#e2e8f0; line-height:1;">03</span>
+                        </td>
+                        <td style="padding-left:16px;">
+                          <h3 style="margin:0 0 8px; font-size:16px; font-weight:700; color:#0f172a;">
+                            {{#if @custom.item3_title}}{{@custom.item3_title}}{{else}}AI Item Title{{/if}}
+                          </h3>
+                          <p style="margin:0 0 12px; font-size:14px; line-height:1.6; color:#4b5563;">
+                            {{#if @custom.item3_summary}}{{@custom.item3_summary}}{{else}}Third notable story. Consider including a contrarian take or underreported angle.{{/if}}
+                          </p>
+                          {{#if @custom.item3_url}}
+                          <a href="{{@custom.item3_url}}" style="font-size:13px; color:#f97316; font-weight:600; text-decoration:none;">
+                            Read more →
+                          </a>
+                          {{/if}}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Divider -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="padding: 32px 0;">
+                    <div style="height:1px; background-color:#e2e8f0;"></div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- ================================================================
+                   SECTION: PRACTITIONER TAKE
+              ================================================================ -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="padding-bottom:24px;">
+                    <span style="font-size:11px; font-weight:700; color:#f97316; letter-spacing:2px; text-transform:uppercase;">
+                      🧠 Practitioner Take
+                    </span>
+                    <h2 style="margin:8px 0 16px; font-size:20px; font-weight:700; color:#0f172a;">
+                      What This Means for Your Business
+                    </h2>
+                    <div style="background:linear-gradient(135deg,#0a2540 0%,#1a4a7a 100%); border-radius:12px; padding:28px 32px;">
+                      <p style="margin:0; font-size:15px; line-height:1.7; color:#e2e8f0; font-style:italic;">
+                        "{{#if @custom.practitioner_take}}{{@custom.practitioner_take}}{{else}}Your weekly practitioner insight goes here. Cut through the noise — what should a small agency owner actually do with this week's AI news? Be specific, be actionable, be honest about limitations.{{/if}}"
+                      </p>
+                      <div style="margin-top:20px; display:flex; align-items:center;">
+                        <div style="width:36px; height:36px; background-color:#f97316; border-radius:50%; text-align:center; line-height:36px; font-size:16px; display:inline-block;">🐬</div>
+                        <span style="margin-left:12px; font-size:13px; color:#93c5fd; font-weight:600;">
+                          Anel Canto · Dolphin Web Dynamics
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Divider -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="padding-bottom:32px;">
+                    <div style="height:1px; background-color:#e2e8f0;"></div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- ================================================================
+                   SECTION: TOOL OF THE WEEK
+              ================================================================ -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="padding-bottom:32px;">
+                    <span style="font-size:11px; font-weight:700; color:#f97316; letter-spacing:2px; text-transform:uppercase;">
+                      🔧 Tool of the Week
+                    </span>
+                    <h2 style="margin:8px 0 16px; font-size:20px; font-weight:700; color:#0f172a;">
+                      {{#if @custom.tool_name}}{{@custom.tool_name}}{{else}}Tool Name{{/if}}
+                    </h2>
+
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+                      style="border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
+                      <tr>
+                        <td style="padding:24px;">
+                          <!-- Tool meta row -->
+                          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                            <tr>
+                              <td>
+                                <span style="display:inline-block; background-color:#dcfce7; color:#166534; font-size:11px; font-weight:700; padding:3px 10px; border-radius:12px; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">
+                                  {{#if @custom.tool_category}}{{@custom.tool_category}}{{else}}AI Tool{{/if}}
+                                </span>
+                              </td>
+                              <td align="right">
+                                <span style="font-size:12px; color:#6b7280;">
+                                  {{#if @custom.tool_pricing}}💰 {{@custom.tool_pricing}}{{else}}💰 Free tier available{{/if}}
+                                </span>
+                              </td>
+                            </tr>
+                          </table>
+
+                          <p style="margin:0 0 16px; font-size:14px; line-height:1.6; color:#4b5563;">
+                            {{#if @custom.tool_description}}{{@custom.tool_description}}{{else}}What does this tool do, and why is it worth your 10 minutes this week? Practical, opinionated take — not a feature list.{{/if}}
+                          </p>
+
+                          <!-- Pros/Cons -->
+                          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                            <tr>
+                              <td class="two-col" width="48%" valign="top" style="padding-right:8px;">
+                                <div style="background-color:#f0fdf4; border-radius:8px; padding:12px 16px;">
+                                  <p style="margin:0 0 8px; font-size:12px; font-weight:700; color:#166534; text-transform:uppercase; letter-spacing:1px;">✅ Best for</p>
+                                  <p style="margin:0; font-size:13px; line-height:1.5; color:#374151;">
+                                    {{#if @custom.tool_bestfor}}{{@custom.tool_bestfor}}{{else}}Describe the ideal use case in 1-2 sentences.{{/if}}
+                                  </p>
+                                </div>
+                              </td>
+                              <td class="two-col" width="48%" valign="top" style="padding-left:8px;">
+                                <div style="background-color:#fef2f2; border-radius:8px; padding:12px 16px;">
+                                  <p style="margin:0 0 8px; font-size:12px; font-weight:700; color:#991b1b; text-transform:uppercase; letter-spacing:1px;">⚠️ Watch out</p>
+                                  <p style="margin:0; font-size:13px; line-height:1.5; color:#374151;">
+                                    {{#if @custom.tool_watchout}}{{@custom.tool_watchout}}{{else}}Limitations, gotchas, or when NOT to use it.{{/if}}
+                                  </p>
+                                </div>
+                              </td>
+                            </tr>
+                          </table>
+
+                          {{#if @custom.tool_url}}
+                          <div style="margin-top:16px;">
+                            <a href="{{@custom.tool_url}}"
+                              style="font-size:13px; color:#0a2540; font-weight:600; text-decoration:none; border:1px solid #0a2540; padding:8px 16px; border-radius:6px;">
+                              Try {{@custom.tool_name}} →
+                            </a>
+                          </div>
+                          {{/if}}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- ================================================================
+               CTA
+          ================================================================ -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#0a2540 0%,#1a4a7a 100%); padding:40px; text-align:center;">
+              <h2 style="margin:0 0 12px; font-size:22px; font-weight:700; color:#ffffff;">
+                Get More From Your AI Stack
+              </h2>
+              <p style="margin:0 0 24px; font-size:15px; color:#93c5fd; line-height:1.5;">
+                Premium members get implementation guides, prompt templates, and direct access for Q&amp;A.
+              </p>
+              <a class="cta-button" href="https://newsletter.dolphinwebdynamics.com/#/portal/signup"
+                style="display:inline-block; background-color:#f97316; color:#ffffff; font-size:16px; font-weight:700; text-decoration:none; padding:16px 36px; border-radius:8px; letter-spacing:-0.2px;">
+                Upgrade to Premium →
+              </a>
+              <p style="margin:16px 0 0; font-size:12px; color:#64748b;">
+                Cancel anytime · No fluff guarantee
+              </p>
+            </td>
+          </tr>
+
+          <!-- ================================================================
+               FOOTER
+          ================================================================ -->
+          <tr>
+            <td style="background-color:#f8fafc; padding:24px 40px; text-align:center; border-top:1px solid #e2e8f0;">
+              <p style="margin:0 0 8px; font-size:13px; color:#6b7280;">
+                <strong style="color:#0f172a;">Dolphin Web Dynamics</strong> · AI Insights for Builders
+              </p>
+              <p style="margin:0 0 12px; font-size:12px; color:#9ca3af;">
+                You're receiving this because you subscribed at
+                <a href="https://newsletter.dolphinwebdynamics.com" style="color:#f97316; text-decoration:none;">newsletter.dolphinwebdynamics.com</a>
+              </p>
+              <p style="margin:0; font-size:12px; color:#9ca3af;">
+                <a href="{{unsubscribe_url}}" style="color:#6b7280; text-decoration:underline;">Unsubscribe</a>
+                &nbsp;·&nbsp;
+                <a href="https://newsletter.dolphinwebdynamics.com" style="color:#6b7280; text-decoration:underline;">View in browser</a>
+                &nbsp;·&nbsp;
+                <a href="https://newsletter.dolphinwebdynamics.com/#/portal/account" style="color:#6b7280; text-decoration:underline;">Manage preferences</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+        <!-- /email-card -->
+
+        <!-- Anti-spam footer -->
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600">
+          <tr>
+            <td style="padding:16px; text-align:center;">
+              <p style="margin:0; font-size:11px; color:#9ca3af;">
+                © {{date published_at format="YYYY"}} Dolphin Web Dynamics LLC · All rights reserved
+              </p>
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

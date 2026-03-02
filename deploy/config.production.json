@@ -1,0 +1,61 @@
+{
+  "url": "https://newsletter.dolphinwebdynamics.com",
+  "server": {
+    "port": 2368,
+    "host": "127.0.0.1"
+  },
+  "database": {
+    "client": "mysql",
+    "connection": {
+      "host": "127.0.0.1",
+      "user": "ghost",
+      "password": "REPLACE_WITH_DB_PASSWORD",
+      "database": "ghost_production",
+      "charset": "utf8mb4"
+    }
+  },
+  "mail": {
+    "transport": "SMTP",
+    "options": {
+      "host": "email-smtp.us-east-1.amazonaws.com",
+      "port": 587,
+      "secure": false,
+      "auth": {
+        "user": "REPLACE_WITH_SES_SMTP_USER",
+        "pass": "REPLACE_WITH_SES_SMTP_PASSWORD"
+      }
+    },
+    "from": "Dolphin Web Dynamics <newsletter@dolphinwebdynamics.com>"
+  },
+  "logging": {
+    "transports": ["stdout", "file"],
+    "level": "info",
+    "rotation": {
+      "enabled": true,
+      "count": 10,
+      "period": "1d"
+    },
+    "path": "/var/www/ghost/content/logs"
+  },
+  "paths": {
+    "contentPath": "/var/www/ghost/content"
+  },
+  "privacy": {
+    "useUpdateCheck": false,
+    "useGravatar": false,
+    "useRpcPing": false,
+    "useStructuredData": true
+  },
+  "imageOptimization": {
+    "resize": true
+  },
+  "compress": true,
+  "caching": {
+    "301": {
+      "maxAge": 31536000
+    },
+    "public": {
+      "maxAge": 0
+    }
+  }
+}

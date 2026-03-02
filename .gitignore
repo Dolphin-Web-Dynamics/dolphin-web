@@ -1,0 +1,11 @@
+# Secrets — never commit
+deploy/.ses-credentials
+deploy/.vm-public-ip
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.swp
