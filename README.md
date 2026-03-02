@@ -5,7 +5,7 @@ Two-site architecture for Dolphin Web Dynamics:
 | Site | URL | Stack |
 |------|-----|-------|
 | Agency site | `dolphinwebdynamics.com` | React/Vite → Vercel |
-| Newsletter/blog/memberships | `newsletter.dolphinwebdynamics.com` | Ghost → Oracle Cloud VM |
+| Newsletter/blog/memberships | `newsletter.dolphinwebdynamics.com` | Ghost → Google Cloud Compute Engine |
 
 ---
 
@@ -13,60 +13,50 @@ Two-site architecture for Dolphin Web Dynamics:
 
 Before running any scripts, verify you have:
 
-- [ ] **OCI CLI** — `oci --version` (configured for tenancy `anel49`, region `us-phoenix-1`)
-- [ ] **AWS CLI** — `aws --version` (configured with your IAM credentials)
+- [ ] **gcloud CLI** — `gcloud --version` (authenticated: `gcloud auth login`, project: `dolphin-vertex-ai`)
+- [ ] **AWS CLI** — `aws --version` (configured with your IAM credentials, for Route 53)
 - [ ] **jq** — `jq --version` (`brew install jq`)
-- [ ] **Python 3** — `python3 --version` (for SES SMTP password derivation)
 - [ ] **Vercel CLI** — `vercel --version` (`npm install -g vercel`)
-- [ ] **OCI Compartment OCID** — export it: `export OCI_COMPARTMENT_ID=ocid1.compartment...`
-- [ ] **Route 53 hosted zone** for `dolphinwebdynamics.com` (or domain registrar access)
 - [ ] **Node.js 18+** on your local machine
 
 ---
 
 ## Execution Order
 
-### Step 1 — Provision Oracle Cloud VM
+### Step 1 — Provision GCE VM
 
 ```bash
-chmod +x deploy/01-provision-vm.sh
-export OCI_COMPARTMENT_ID=$(oci iam compartment list --query 'data[0].id' --raw-output)
-./deploy/01-provision-vm.sh
+chmod +x deploy/01-provision-gce.sh
+./deploy/01-provision-gce.sh
 ```
 
-This creates the VCN, subnet, internet gateway, security list (ports 22/80/443), and launches a `VM.Standard.A1.Flex` instance (2 OCPUs, 12GB RAM — Always Free tier).
+This creates:
+- Firewall rule `ghost-allow-web` (tcp:22,80,443)
+- Static external IP `ghost-newsletter-ip`
+- `e2-small` VM (2 vCPU shared, 2GB RAM, ~$14/mo) in `us-central1-a`
+- Ubuntu 22.04 LTS, 30GB balanced persistent disk
+- Route 53 A record: `newsletter.dolphinwebdynamics.com` → static IP
 
-**Output**: The VM's public IP is printed and saved to `deploy/.vm-public-ip`.
+**Output**: The VM's static public IP is printed and saved to `deploy/.vm-public-ip`.
 
 ---
 
 ### Step 2 — Configure DNS via Route 53
 
-The `03-setup-ses.sh` script auto-creates Route 53 records if a hosted zone exists. You can also do it manually.
+The `01-provision-gce.sh` script auto-creates the `newsletter` A record in Route 53.
+The `03-setup-ses.sh` script creates all SES/DKIM/DMARC records.
 
 **If dolphinwebdynamics.com is already in Route 53**, skip to Step 3.
 
-**If using an external registrar**, update nameservers to point to Route 53:
-
-1. Create a hosted zone in Route 53:
-   ```bash
-   aws route53 create-hosted-zone \
-     --name dolphinwebdynamics.com \
-     --caller-reference "$(date +%s)"
-   ```
-2. Note the 4 NS records returned
-3. Go to your registrar (GoDaddy/Namecheap/etc.) → Update nameservers to the Route 53 NS values
-4. Wait up to 48 hours for propagation
-
-**Manual DNS records** (if not using Route 53 automation):
+**Manual DNS records** (if not using scripts):
 
 | Record | Type | Value | TTL |
 |--------|------|-------|-----|
 | `dolphinwebdynamics.com` | A/ALIAS | Vercel IP (or CNAME to `cname.vercel-dns.com`) | 300 |
 | `www.dolphinwebdynamics.com` | CNAME | `cname.vercel-dns.com` | 300 |
-| `newsletter.dolphinwebdynamics.com` | A | `<Oracle VM public IP>` | 300 |
+| `newsletter.dolphinwebdynamics.com` | A | `<GCE static IP>` | 300 |
 
-> The newsletter subdomain A record pointing to your Oracle VM IP is the key record. Run `cat deploy/.vm-public-ip` to get the IP after Step 1.
+> Run `cat deploy/.vm-public-ip` to get the static IP after Step 1.
 
 ---
 
@@ -106,14 +96,14 @@ nano deploy/config.production.json
 ### Step 4 — Install Ghost on the VM
 
 ```bash
-VM_IP=$(cat deploy/.vm-public-ip)
+ZONE="us-central1-a"
 
 # Copy install script and config to VM
-scp -i ~/.ssh/ghost-oracle deploy/02-install-ghost.sh ubuntu@$VM_IP:~/
-scp -i ~/.ssh/ghost-oracle deploy/config.production.json ubuntu@$VM_IP:~/
+gcloud compute scp deploy/02-install-ghost.sh ghost-newsletter:~/ --zone=$ZONE
+gcloud compute scp deploy/config.production.json ghost-newsletter:~/ --zone=$ZONE
 
 # Run the install script (~10 minutes)
-ssh -i ~/.ssh/ghost-oracle ubuntu@$VM_IP 'bash ~/02-install-ghost.sh'
+gcloud compute ssh ghost-newsletter --zone=$ZONE -- 'bash ~/02-install-ghost.sh'
 ```
 
 > **Important**: The DNS A record for `newsletter.dolphinwebdynamics.com` must be propagated before running this script — Certbot needs to verify domain ownership via HTTP.
@@ -121,7 +111,7 @@ ssh -i ~/.ssh/ghost-oracle ubuntu@$VM_IP 'bash ~/02-install-ghost.sh'
 Check propagation first:
 ```bash
 dig newsletter.dolphinwebdynamics.com A +short
-# Should return your Oracle VM IP
+# Should return your GCE static IP
 ```
 
 ---
@@ -184,14 +174,14 @@ Complete DNS records for `dolphinwebdynamics.com`:
 |------|------|-------|---------|
 | `dolphinwebdynamics.com` | A/ALIAS | Vercel | Agency site root |
 | `www` | CNAME | `cname.vercel-dns.com` | Agency site www |
-| `newsletter` | A | `<Oracle VM IP>` | Ghost newsletter |
+| `newsletter` | A | `<GCE static IP>` | Ghost newsletter |
 | `_amazonses` | TXT | `<token from SES>` | SES domain verification |
 | `<token1>._domainkey` | CNAME | `<token1>.dkim.amazonses.com` | DKIM email signing |
 | `<token2>._domainkey` | CNAME | `<token2>.dkim.amazonses.com` | DKIM email signing |
 | `<token3>._domainkey` | CNAME | `<token3>.dkim.amazonses.com` | DKIM email signing |
 | `_dmarc` | TXT | `v=DMARC1; p=none; rua=mailto:dmarc@dolphinwebdynamics.com` | DMARC policy |
 
-All Route 53 records are created automatically by `03-setup-ses.sh`.
+All Route 53 records are created automatically by `03-setup-ses.sh` and `01-provision-gce.sh`.
 
 ---
 
@@ -212,8 +202,7 @@ Format: ghost_production_YYYYMMDD-HHMMSS.sql.gz
 
 **Manual backup commands**:
 ```bash
-VM_IP=$(cat deploy/.vm-public-ip)
-ssh -i ~/.ssh/ghost-oracle ubuntu@$VM_IP
+gcloud compute ssh ghost-newsletter --zone=us-central1-a
   sudo /usr/local/bin/ghost-backup.sh
   ls -la /var/backups/ghost/
 ```
@@ -224,7 +213,7 @@ ssh -i ~/.ssh/ghost-oracle ubuntu@$VM_IP
 
 After completing all steps:
 
-- [ ] `ssh -i ~/.ssh/ghost-oracle ubuntu@$(cat deploy/.vm-public-ip)` — SSH works
+- [ ] `gcloud compute ssh ghost-newsletter --zone=us-central1-a` — SSH works
 - [ ] `https://newsletter.dolphinwebdynamics.com` — Ghost site loads, SSL padlock shows
 - [ ] `https://newsletter.dolphinwebdynamics.com/ghost/` — Ghost admin login works
 - [ ] Ghost Admin → Settings → Email → Send test email arrives in inbox
@@ -239,7 +228,7 @@ After completing all steps:
 
 ### Ghost won't start
 ```bash
-ssh -i ~/.ssh/ghost-oracle ubuntu@$VM_IP
+gcloud compute ssh ghost-newsletter --zone=us-central1-a
 cd /var/www/ghost
 sudo -u ghost-user ghost status
 sudo -u ghost-user ghost log
@@ -272,12 +261,9 @@ sudo systemctl reload nginx
 3. Test with [mail-tester.com](https://www.mail-tester.com) — send a test email, get a score
 4. Ensure SES production access has been approved (out of sandbox)
 
-### Oracle VM out of memory
-The A1.Flex with 12GB RAM handles Ghost well, but you can check:
+### VM out of memory
+The e2-small with 2GB RAM is sufficient for Ghost + MySQL + Nginx. Add swap if needed:
 ```bash
-free -h
-sudo systemctl status ghost_*
-# Add swap if needed:
 sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile
 sudo mkswap /swapfile && sudo swapon /swapfile
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
@@ -289,24 +275,24 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
 ```
 dolphin-web/
-├── README.md                    # This file
+├── README.md                        # This file
 ├── deploy/
-│   ├── 01-provision-vm.sh       # OCI CLI: create VM + networking
-│   ├── 02-install-ghost.sh      # Ghost stack installer (runs on VM)
-│   ├── 03-setup-ses.sh          # AWS SES + Route 53 DNS setup
-│   ├── config.production.json   # Ghost production config (edit before deploying)
-│   ├── nginx-ghost.conf         # Nginx reverse proxy config (reference)
-│   ├── .vm-public-ip            # Auto-generated: Oracle VM public IP
-│   └── .ses-credentials         # Auto-generated: SES SMTP credentials (SECRET)
+│   ├── 01-provision-gce.sh          # gcloud: create VM + firewall + static IP + DNS
+│   ├── 02-install-ghost.sh          # Ghost stack installer (runs on VM via gcloud ssh)
+│   ├── 03-setup-ses.sh              # AWS SES + Route 53 DNS setup
+│   ├── config.production.json       # Ghost production config (edit before deploying)
+│   ├── nginx-ghost.conf             # Nginx reverse proxy config (reference)
+│   ├── .vm-public-ip                # Auto-generated: GCE static IP
+│   └── .ses-credentials             # Auto-generated: SES SMTP credentials (SECRET)
 └── templates/
-    └── newsletter-weekly.hbs    # Ghost email template
+    └── newsletter-weekly.hbs        # Ghost email template
 
 # Separate project:
 internet-whisper-check/
-└── vercel.json                  # Vercel deployment config
+└── vercel.json                      # Vercel deployment config
 ```
 
-> **Security note**: `deploy/.ses-credentials` and `deploy/.vm-public-ip` are gitignored by convention. Add to `.gitignore` if you initialize a git repo here:
+> **Security note**: `deploy/.ses-credentials` and `deploy/.vm-public-ip` are gitignored. Verify `.gitignore` contains:
 > ```
 > deploy/.ses-credentials
 > deploy/.vm-public-ip

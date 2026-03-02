@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # =============================================================================
-# 02-install-ghost.sh — Install Ghost CMS stack on Oracle Cloud Ubuntu 22.04
+# 02-install-ghost.sh — Install Ghost CMS stack on GCE Ubuntu 22.04
 # =============================================================================
-# Run this script ON the Oracle VM (copy via scp first):
+# Run this script ON the GCE VM (copy via gcloud compute scp first):
 #
-#   scp -i ~/.ssh/ghost-oracle deploy/02-install-ghost.sh ubuntu@<VM_IP>:~/
-#   ssh -i ~/.ssh/ghost-oracle ubuntu@<VM_IP> 'bash ~/02-install-ghost.sh'
+#   ZONE="us-central1-a"
+#   gcloud compute scp deploy/02-install-ghost.sh ghost-newsletter:~/ --zone=$ZONE
+#   gcloud compute scp deploy/config.production.json ghost-newsletter:~/ --zone=$ZONE
+#   gcloud compute ssh ghost-newsletter --zone=$ZONE -- 'bash ~/02-install-ghost.sh'
 #
 # What this installs:
 #   - System updates + dependencies
@@ -273,4 +275,7 @@ echo "  1. Visit https://$GHOST_DOMAIN/ghost/ to create your admin account"
 echo "  2. Configure SES email — run deploy/03-setup-ses.sh locally"
 echo "  3. Update config.production.json with SES SMTP credentials"
 echo "  4. Connect Stripe in Ghost Admin → Settings → Memberships"
+echo ""
+echo "  To SSH back in:"
+echo "    gcloud compute ssh ghost-newsletter --zone=us-central1-a"
 echo "============================================================"
